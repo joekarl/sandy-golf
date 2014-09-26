@@ -1,4 +1,4 @@
-desert-golf-clone
+sandy-golf
 =================
 
-Canvas clone of desert golf. http://desertgolfing.captain-games.com/
+Canvas clone of desert golf.
