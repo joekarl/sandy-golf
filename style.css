@@ -6,11 +6,11 @@ html, body {
 
 #fw_wrapper {
     width: 1000px;
-    height: 100%;
     padding: 20px;
     margin-left: auto;
     margin-right: auto;
     background: #D6AD71;
+    padding-bottom: 150px;
 }
 
 #gameCanvas {

@@ -10,9 +10,10 @@
         <canvas id="gameCanvas" width="800" height="600"></canvas>
     </div>
 
-    <script type="text/javascript" src="sandy-golf.js"></script>
-    <script type="text/javascript">
-        SG.init(document.getElementById('gameCanvas'));
+    <script src="stats.min.js"></script>
+    <script src="sandy-golf.js"></script>
+    <script>
+        SG.init(document.getElementById('gameCanvas'), true);
     </script>
 </body>
 </html>
