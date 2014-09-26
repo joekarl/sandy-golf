@@ -1,7 +1,7 @@
-SG = (function(undefined){
+SG = (function(){
 
     function init(canvas) {
-
+        
     }
 
     return {
