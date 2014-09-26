@@ -6,15 +6,23 @@ SG = (function(){
         //canvasWidth
         //canvasHeight
         //debug
+        //world
+        //physics
+        PI_X2: 2 * Math.PI,
         updateInterval : 15 //updates per second
     };
 
     function updateGame() {
-
+        var ball = g.world.ball;
+        ball.update.call(ball);
     }
 
     function drawGame(dt, ctx) {
-
+        var ball = g.world.ball;
+        ctx.save();
+        //change coordinate system
+        ball.render.call(ball, dt, ctx);
+        ctx.restore();
     }
 
     function initGame(canvas, debug) {
@@ -24,7 +32,27 @@ SG = (function(){
         g.ctx2d = canvas.getContext('2d');
         g.debug = !!debug;
         initMouse();
+        initWorld();
         initGameLoop();
+    }
+
+    function initWorld() {
+        g.world = {
+            ball: {
+                x: 50,
+                y: 50,
+                radius: 5,
+                render: function(dt, ctx) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.radius, 0, g.PI_X2, false);
+                    ctx.fillStyle = 'white';
+                    ctx.fill();
+                },
+                update: function() {
+
+                }
+            }
+        };
     }
 
     function initMouse() {
