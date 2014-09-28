@@ -67,7 +67,7 @@ SG = (function(){
         initWorld();
         if (debug) {
             cp.CollisionHandler.prototype.begin = function(arb, space) {
-                console.log(arb);
+                //console.log(arb);
                 return true;
             };
         }
@@ -76,20 +76,19 @@ SG = (function(){
 
     function initWorld() {
         g.physicsSpace = new cp.Space();
-        g.physicsSpace.iterations = 120;
-        //g.physicsSpace.collisionSlop = 0.1;
+        //g.physicsSpace.iterations = 1000;
         g.physicsSpace.gravity = cp.v(0, g.gravity);
 
         SG_LEVELS.initLevelManager(g.physicsSpace, g.camera, g.canvasWidth);
 
         var spawnLocation = SG_LEVELS.getRespawnLocation();
-        var spawnVecPos = cp.v(spawnLocation[0], spawnLocation[1] + g.ballRadius + 250);
+        var spawnVecPos = cp.v(spawnLocation[0], spawnLocation[1] + g.ballRadius + 150);
 
-        var ballBody = g.physicsSpace.addBody(new cp.Body(50, 1));
+        var ballBody = g.physicsSpace.addBody(new cp.Body(50, 5));
         ballBody.setPos(spawnVecPos);
         var ballShape = g.physicsSpace.addShape(new cp.CircleShape(ballBody, g.ballRadius, cp.vzero));
-        ballShape.setFriction(0.3);
-        ballShape.setElasticity(0.2);
+        ballShape.setFriction(20);
+        ballShape.setElasticity(0.15);
 
         g.world = {
             ball: {
@@ -107,6 +106,7 @@ SG = (function(){
                     this.transform.y(pos.y);
                     this.transform.vx(vel.x);
                     this.transform.vy(vel.y);
+                    ballBody.setAngVel(ballBody.getAngVel() * 0.55);
                 }
             }
         };
@@ -116,9 +116,6 @@ SG = (function(){
     function initMouse() {
 
     }
-
-
-
 
     return {
         init: initGame

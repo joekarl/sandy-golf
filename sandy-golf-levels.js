@@ -11,7 +11,7 @@ SG_LEVELS = (function(){
         levels: [], //list of levels
         currentLevelIndex: 1, //index of level currently on
         animatingLevelTransition: false, //are we currently animating levels
-        groundFriction: 1,
+        groundFriction: 50000,
         groundElasticity: 2
     };
 
@@ -53,7 +53,7 @@ SG_LEVELS = (function(){
                     ctx.lineTo(part.x3 + offset, part.y3);
                     ctx.lineTo(part.x4 + offset, part.y4);
                     ctx.lineTo(part.x1 + offset, part.y1);
-                    ctx.stroke();
+                    ctx.fill();
                     ctx.closePath();
                 });
             },
@@ -137,11 +137,17 @@ SG_LEVELS = (function(){
         var cup = cupLevelParts(655,50,10,10);
         return new Level(
             [
-                new LevelPart(0,50, 650,50, 650,0, 0,0),
+                new LevelPart(0,50, 250,50, 250,0, 0,0),
+                new LevelPart(250,50, 280,70, 280,0, 250,0),
+                new LevelPart(280,70, 300,70, 300,0, 280,0),
+                new LevelPart(300,70, 350,50, 350,0, 300,0),
+                new LevelPart(350,50, 450,50, 450,0, 350,0),
+                new LevelPart(450,50, 645,75, 645,0, 450,0),
+                new LevelPart(645,50, 650,50, 650,0, 645,0),
                 cup[0],
                 cup[1],
                 new LevelPart(660,50, 800,50, 800,0, 660,0)
-            ], 650, 50);
+            ], 310, 50);
     }
 
     function level2() {
@@ -166,9 +172,10 @@ SG_LEVELS = (function(){
     }
 
     function cupLevelParts(x, y, width, depth) {
+        var cupDip = 4;
         return [
-            new LevelPart(x-width,y-depth, x+2,y-depth-2, x+2,y-10000, x-width,y-10000),
-            new LevelPart(x-2,y-depth-2, x+width,y-depth, x+width,y-10000, x-2,y-10000)
+            new LevelPart(x-width,y-depth, x+2,y-depth-cupDip, x+2,y-10000, x-width,y-10000),
+            new LevelPart(x-2,y-depth-cupDip, x+width,y-depth, x+width,y-10000, x-2,y-10000)
         ];
     }
 
