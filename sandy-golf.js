@@ -1,3 +1,5 @@
+//requires engine.js, chipmunk.js, sandy-golf-levels.js
+
 SG = (function(){
 
     var g = {
@@ -8,10 +10,11 @@ SG = (function(){
         //debug
         //world
         //physicsSpace
-        ballRadius: 5,
+        ballRadius: 2,
         PI_X2: 2 * Math.PI,
         time: 0,
-        updatesPerSecond : 15 //updates per second
+        gravity: -0.25,
+        updatesPerSecond : 60 //updates per second
     };
 
     function updateGame() {
@@ -20,6 +23,8 @@ SG = (function(){
 
         var ball = g.world.ball;
         ball.update.call(ball);
+
+        SG_LEVELS.update();
     }
 
     function drawGame(dt, ctx) {
@@ -28,10 +33,16 @@ SG = (function(){
         //render ball
         var ball = g.world.ball;
         ctx.save();
-        var tx = ball.x + dt * ball.dx;
-        var ty = -ball.y + g.canvasHeight + dt * ball.dy;
+        var tx = ball.transform.x() + dt * ball.transform.vx() + g.camera.transform.x();
+        var ty = -ball.transform.y() + g.canvasHeight + dt * ball.transform.vy() + g.camera.transform.y();
         ctx.translate(tx, ty);
         ball.render.call(ball, ctx);
+        ctx.restore();
+
+        ctx.save();
+        ctx.translate(g.camera.transform.x(), g.camera.transform.y() + g.canvasHeight);
+        ctx.scale(1, -1);
+        SG_LEVELS.draw(ctx);
         ctx.restore();
     }
 
@@ -39,7 +50,7 @@ SG = (function(){
         ctx.translate(0,0);
         ctx.scale(1,1);
         ctx.rotate(0);
-        ctx.fillStyle = "rgb(0,0,0)";
+        ctx.fillStyle = "#D6AD71";
         ctx.fillRect (0, 0, g.canvasWidth, g.canvasHeight);
         ctx.fillStyle = undefined;
         ctx.strokeStyle = undefined;
@@ -51,29 +62,38 @@ SG = (function(){
         g.canvasHeight = canvas.height;
         g.ctx2d = canvas.getContext('2d');
         g.debug = !!debug;
+        g.camera = new SG_ENGINE.Camera();
         initMouse();
         initWorld();
-        initGameLoop();
+        if (debug) {
+            cp.CollisionHandler.prototype.begin = function(arb, space) {
+                console.log(arb);
+                return true;
+            };
+        }
+        SG_ENGINE.initGameLoop(g.updatesPerSecond, g.ctx2d, updateGame, drawGame, debug);
     }
 
     function initWorld() {
         g.physicsSpace = new cp.Space();
-        g.physicsSpace.gravity = cp.v(0, -1);
+        g.physicsSpace.iterations = 60;
+        g.physicsSpace.collisionSlop = 5;
+        g.physicsSpace.gravity = cp.v(0, g.gravity);
 
-        var ballBody = g.physicsSpace.addBody(new cp.Body(100, 5));
-        ballBody.setPos(cp.v(50,250));
-        var ballShape = g.physicsSpace.addShape(new cp.CircleShape(ballBody, g.ballRadius, cp.v(50,250)));
-        ballShape.setFriction(0.7);
+        SG_LEVELS.initLevelManager(g.physicsSpace, g.camera, g.canvasWidth);
+
+        var spawnLocation = SG_LEVELS.getRespawnLocation();
+        var spawnVecPos = cp.v(spawnLocation[0], spawnLocation[1] + g.ballRadius + 250);
+
+        var ballBody = g.physicsSpace.addBody(new cp.Body(50, 1));
+        ballBody.setPos(spawnVecPos);
+        var ballShape = g.physicsSpace.addShape(new cp.CircleShape(ballBody, g.ballRadius, cp.v(0,0)));
+        ballShape.setFriction(0.3);
+        ballShape.setElasticity(0.2);
 
         g.world = {
             ball: {
-                //vx
-                //vy
-                //x
-                //y
-                dx: 0,
-                dy: 0,
-                body: ballBody,
+                transform: new SG_ENGINE.Transform(),
                 render: function(ctx) {
                     ctx.beginPath();
                     ctx.arc(0, 0, g.ballRadius, 0, g.PI_X2, false);
@@ -81,65 +101,24 @@ SG = (function(){
                     ctx.fill();
                 },
                 update: function() {
-                    var pos = this.body.getPos();
-                    var vel = this.body.getVel();
-                    this.x = pos.x;
-                    this.y = pos.y;
-                    this.dx = vel.x;
-                    this.dy = vel.y;
+                    var pos = ballBody.getPos();
+                    var vel = ballBody.getVel();
+                    this.transform.x(pos.x);
+                    this.transform.y(pos.y);
+                    this.transform.vx(vel.x);
+                    this.transform.vy(vel.y);
                 }
             }
         };
+
     }
 
     function initMouse() {
 
     }
 
-    function initGameLoop() {
-        var loops = 0,
-            skipTicks = 1000 / g.updatesPerSecond, //in milliseconds
-            maxFrameSkip = 10,
-            nextGameTick = new Date().getTime()
-            ctx = g.ctx2d,
-            fpsStats = {};
 
-        if (g.debug) {
-            fpsStats = new Stats();
-            fpsStats.setMode(0);
 
-            // Align top-left
-            fpsStats.domElement.style.position = 'absolute';
-            fpsStats.domElement.style.left = '0px';
-            fpsStats.domElement.style.top = '0px';
-            document.body.appendChild(fpsStats.domElement);
-        } else {
-            fpsStats.begin = fpsStats.end = function(){/*noop*/};
-        }
-
-        var _loop = function() {
-            fpsStats.begin();
-            loops = 0;
-            var currentTime = new Date().getTime();
-
-            while (currentTime > nextGameTick && loops < maxFrameSkip) {
-                updateGame(skipTicks);
-                nextGameTick += skipTicks;
-                if (nextGameTick < currentTime) {
-                    nextGameTick = currentTime + skipTicks;
-                }
-                loops++;
-            }
-
-            var interpolation = (nextGameTick - currentTime) / skipTicks;
-            interpolation = interpolation > 1 ? 1 : interpolation;
-            interpolation = interpolation < 0 ? 0 : interpolation;
-            drawGame(interpolation, ctx);
-            fpsStats.end();
-            window.requestAnimationFrame(_loop);
-        };
-        _loop();
-    }
 
     return {
         init: initGame
