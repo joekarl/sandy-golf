@@ -13,7 +13,7 @@ SG = (function(){
         ballRadius: 2,
         PI_X2: 2 * Math.PI,
         time: 0,
-        gravity: -0.25,
+        gravity: -0.05,
         updatesPerSecond : 60 //updates per second
     };
 
@@ -76,8 +76,8 @@ SG = (function(){
 
     function initWorld() {
         g.physicsSpace = new cp.Space();
-        g.physicsSpace.iterations = 60;
-        g.physicsSpace.collisionSlop = 5;
+        g.physicsSpace.iterations = 120;
+        //g.physicsSpace.collisionSlop = 0.1;
         g.physicsSpace.gravity = cp.v(0, g.gravity);
 
         SG_LEVELS.initLevelManager(g.physicsSpace, g.camera, g.canvasWidth);
@@ -87,7 +87,7 @@ SG = (function(){
 
         var ballBody = g.physicsSpace.addBody(new cp.Body(50, 1));
         ballBody.setPos(spawnVecPos);
-        var ballShape = g.physicsSpace.addShape(new cp.CircleShape(ballBody, g.ballRadius, cp.v(0,0)));
+        var ballShape = g.physicsSpace.addShape(new cp.CircleShape(ballBody, g.ballRadius, cp.vzero));
         ballShape.setFriction(0.3);
         ballShape.setElasticity(0.2);
 
