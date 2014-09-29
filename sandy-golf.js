@@ -39,6 +39,9 @@ SG = (function(){
         ball.render.call(ball, ctx);
         ctx.restore();
 
+        var arrow = g.world.arrow;
+        arrow.render.call(arrow, ctx);
+
         ctx.save();
         ctx.translate(g.camera.transform.x(), g.camera.transform.y() + g.canvasHeight);
         ctx.scale(1, -1);
@@ -63,8 +66,8 @@ SG = (function(){
         g.ctx2d = canvas.getContext('2d');
         g.debug = !!debug;
         g.camera = new SG_ENGINE.Camera();
-        initMouse();
         initWorld();
+        initMouse(canvas);
         SG_ENGINE.initGameLoop(g.updatesPerSecond, g.ctx2d, updateGame, drawGame, debug);
     }
 
@@ -101,13 +104,63 @@ SG = (function(){
                     this.transform.vx(vel.x);
                     this.transform.vy(vel.y);
                 }
+            },
+            arrow: {
+                transform: new SG_ENGINE.Transform(),
+                active: false,
+                render: function(ctx) {
+                    if(this.active) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.transform.x(), this.transform.y());
+                        ctx.lineTo(this.transform.x() + this.transform.vx(), this.transform.y() + this.transform.vy());
+                        ctx.closePath();
+                        ctx.stroke();
+                    }
+                }
             }
         };
 
     }
 
-    function initMouse() {
+    function initMouse(canvas) {
+        var state = 'notdragging',
+            arrow = g.world.arrow,
+            arrowTransform = arrow.transform;
 
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left - 5,
+                y: evt.clientY - rect.top - 5
+            };
+        }
+
+        canvas.addEventListener('mousedown', function(e){
+            var pos = getMousePos(canvas, e);
+            state = 'dragging';
+            arrowTransform.x(pos.x);
+            arrowTransform.y(pos.y);
+            arrowTransform.vx(0);
+            arrowTransform.vy(0);
+            arrow.active = true;
+            console.log("start drag " + pos.x + ":" + pos.y);
+        });
+
+        canvas.addEventListener('mousemove', function(e){
+            var pos = getMousePos(canvas, e);
+            if (state == 'dragging') {
+                arrowTransform.vx(arrowTransform.x() - pos.x);
+                arrowTransform.vy(arrowTransform.y() - pos.y);
+                console.log("Dragging " + pos.x + ":" + pos.y);
+            }
+        });
+
+        canvas.addEventListener('mouseup', function(e){
+            var pos = getMousePos(canvas, e);
+            state = 'notdragging';
+            arrow.active = false;
+            console.log("end drag " + pos.x + ":" + pos.y);
+        });
     }
 
     return {
