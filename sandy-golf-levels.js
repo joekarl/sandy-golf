@@ -34,7 +34,7 @@ SG_LEVELS = (function(){
                 physics.setFriction(g.groundFriction);
                 physics.setElasticity(g.groundElasticity);
                 this.physics = physics;
-                console.log(physics.getBB());
+                //console.log(physics.getBB());
             },
             destroyPhysics: function() {
                 g.physicsSpace.removeStaticShape(this.physics);
@@ -147,14 +147,14 @@ SG_LEVELS = (function(){
                 cup[0],
                 cup[1],
                 new LevelPart(660,50, 800,50, 800,0, 660,0)
-            ], 310, 50);
+            ], 40, 50);
     }
 
     function level2() {
         return new Level(
             [
                 new LevelPart(0,50, 800,50, 800,0, 0,0)
-            ], 20, 50);
+            ], 40, 50);
     }
 
     function level3() {

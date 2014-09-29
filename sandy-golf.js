@@ -65,12 +65,6 @@ SG = (function(){
         g.camera = new SG_ENGINE.Camera();
         initMouse();
         initWorld();
-        if (debug) {
-            cp.CollisionHandler.prototype.begin = function(arb, space) {
-                //console.log(arb);
-                return true;
-            };
-        }
         SG_ENGINE.initGameLoop(g.updatesPerSecond, g.ctx2d, updateGame, drawGame, debug);
     }
 
@@ -82,7 +76,7 @@ SG = (function(){
         SG_LEVELS.initLevelManager(g.physicsSpace, g.camera, g.canvasWidth);
 
         var spawnLocation = SG_LEVELS.getRespawnLocation();
-        var spawnVecPos = cp.v(spawnLocation[0], spawnLocation[1] + g.ballRadius + 150);
+        var spawnVecPos = cp.v(spawnLocation[0], spawnLocation[1] + g.ballRadius);
 
         var ballBody = g.physicsSpace.addBody(new cp.Body(50, 5));
         ballBody.setPos(spawnVecPos);
@@ -106,7 +100,6 @@ SG = (function(){
                     this.transform.y(pos.y);
                     this.transform.vx(vel.x);
                     this.transform.vy(vel.y);
-                    ballBody.setAngVel(ballBody.getAngVel() * 0.55);
                 }
             }
         };
